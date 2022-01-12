@@ -1,0 +1,46 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <!-- <script src="http://127.0.0.1:5000/socket.io/socket.io.js"></script> -->
+    <script src="./node_modules/socket.io/client-dist/socket.io.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"></script> -->
+    <script>
+        let username = "Kcee" + Math.round(Math.random() * 100, 0)
+        var socket = io.connect("http://127.0.0.1:5000/", { query: "username=bar"})
+
+        socket.on("connect", function(){
+            socket.send("User has connected");
+            socket.emit('user_connect', 
+            {
+                "user_id": socket.id,
+                "username": username
+            }
+            );
+        });
+
+        socket.on('private_message', function(data){
+            console.log(data.msg + ' ' + 'from ' + data.sender);
+        });
+
+        socket.on('user_list', (data) => {
+            console.log(data);
+        });
+
+        function sendPrivateMessage(msg, to){
+            let sender = socket.id
+            let data = {
+                sender,
+                receiver: to,
+                msg: msg
+            }
+            socket.emit('private_message', data);
+        }
+    </script>
+</body>
+</html>
