@@ -54,7 +54,7 @@ def login():
                 }
                 # set jwt
                 token = jwt.encode(payload, app.config['SECRET_KEY'], "HS256")
-                response = make_response({"message": "successfully logged in user"}, 201)
+                response = make_response({"message": "successfully logged in user", "token": token}, 201)
                 response.set_cookie("token", value=token)
                 return response
         return bad_request("Invalid email or password")

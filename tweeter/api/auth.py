@@ -25,7 +25,7 @@ def get_current_user():
 def login_required(f):
     @wraps(f)
     def check_user_is_logged(*args, **kwargs):
-        jwt_cookie = request.cookies.get('token')
+        jwt_cookie = request.headers.get('Authorization')
         if jwt_cookie:
             try:
                 jwt.decode(jwt_cookie, app.config['SECRET_KEY'], 'HS256')
