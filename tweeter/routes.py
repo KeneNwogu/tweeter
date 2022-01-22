@@ -4,6 +4,7 @@ import secrets
 
 import jwt
 from flask import request, make_response
+from flask_cors import cross_origin
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from werkzeug.http import HTTP_STATUS_CODES
@@ -34,6 +35,7 @@ def register():
 
 
 @app.route('/login', methods=['POST'])
+@cross_origin()
 def login():
     if request.method == 'POST':
         data = request.get_json(force=True)
