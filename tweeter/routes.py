@@ -65,7 +65,7 @@ def login():
 def view_users():
     user = get_current_user()
     print(user)
-    return "you are allowed"
+    return {"message": "you are allowed"}
 
 
 @app.route('/posts/create', methods=['POST'])
