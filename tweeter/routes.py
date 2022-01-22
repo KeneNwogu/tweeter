@@ -6,6 +6,7 @@ import jwt
 from flask import request, make_response
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
+from werkzeug.http import HTTP_STATUS_CODES
 
 from tweeter import app, ALLOWED_EXTENSIONS
 from tweeter.api.auth import login_required, get_current_user
@@ -53,7 +54,7 @@ def login():
                 token = jwt.encode(payload, app.config['SECRET_KEY'], "HS256")
                 response = make_response({"message": "successfully logged in user"})
                 response.set_cookie("token", value=token)
-
+                response.status_code = HTTP_STATUS_CODES.get(200, 'Unknown error')
                 return response
         return bad_request("Invalid email or password")
 
