@@ -13,6 +13,7 @@ from tweeter import app, ALLOWED_EXTENSIONS
 from tweeter.api.auth import login_required, get_current_user
 from tweeter.api.errors import bad_request
 from tweeter import mongo
+from tweeter.utitlities import valid_email
 
 
 @app.route('/register', methods=['POST'])
@@ -25,7 +26,11 @@ def register():
         if mongo.db.users.find_one({"email": data['email']}):
             return bad_request('please use a different email address')
 
+        if not valid_email(data['email']):
+            return bad_request('An invalid email was provided')
+
         password_hash = generate_password_hash(data['password'])
+        # TODO gravitar profile image
         user_data = {
             "email": data['email'],
             "password_hash": password_hash
