@@ -13,15 +13,15 @@ def valid_email(email):
 
 
 def gravatar_profile_image(email: str):
-    base_url = 'https://www.gravatar.com/avatar?'
-    default = {'d': 'monsterid'}
-    email_hash = hashlib.md5(email.encode()).hexdigest()
+    default = {'d': 'retro'}
+    email_hash = hashlib.md5(email.encode())
+    email_hash = email_hash.hexdigest()
+    base_url = f'https://www.gravatar.com/avatar/{email_hash}?'
     req = requests.models.PreparedRequest()
-    url = urljoin(base_url, email_hash)
-    req.prepare_url(url, params=default)
+    req.prepare_url(base_url, params=default)
     return req.url
 
 
-print(gravatar_profile_image('test@test.com'))
+# print(gravatar_profile_image("GeeksforGeeks"))
 
 
