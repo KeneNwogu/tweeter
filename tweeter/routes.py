@@ -39,7 +39,12 @@ def register():
             "bio": "Hey there! I'm using Tweeter"
         }
         user = mongo.db.users.insert_one(user_data)
-        return {"message": "successfully registered user"}
+        return {
+            "message": "successfully registered user",
+            "username": user_data.get('username'),
+            "bio": user_data.get('bio'),
+            "profile_image": user_data.get('profile_image')
+        }
 
 
 @app.route('/login', methods=['POST'])
@@ -112,4 +117,3 @@ def create_post():
             mongo.db.posts.insert_one({"caption": caption, "user": user})
 
     return {"message": "fix it"}
-
