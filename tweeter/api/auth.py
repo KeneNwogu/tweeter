@@ -12,7 +12,7 @@ token_auth = HTTPTokenAuth()
 
 
 def get_current_user():
-    jwt_cookie = request.cookies.get('token')
+    jwt_cookie = request.headers.get('Authorization')
     if jwt_cookie:
         try:
             user_payload = jwt.decode(jwt_cookie, app.config['SECRET_KEY'], 'HS256')

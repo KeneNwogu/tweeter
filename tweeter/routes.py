@@ -7,13 +7,11 @@ from flask import request, make_response
 from flask_cors import cross_origin
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
-from werkzeug.http import HTTP_STATUS_CODES
-
 from tweeter import app, ALLOWED_EXTENSIONS
 from tweeter.api.auth import login_required, get_current_user
 from tweeter.api.errors import bad_request
 from tweeter import mongo
-from tweeter.utitlities import valid_email
+from tweeter.utitlities import valid_email, gravatar_profile_image
 
 
 @app.route('/register', methods=['POST'])
@@ -31,9 +29,14 @@ def register():
 
         password_hash = generate_password_hash(data['password'])
         # TODO gravitar profile image
+        email = data['email']
+        profile_image = gravatar_profile_image(email)
         user_data = {
-            "email": data['email'],
-            "password_hash": password_hash
+            "email": email,
+            "username": email,
+            "password_hash": password_hash,
+            "profile_image": profile_image,
+            "bio": "Hey there! I'm using Tweeter"
         }
         user = mongo.db.users.insert_one(user_data)
         return {"message": "successfully registered user"}
@@ -59,8 +62,14 @@ def login():
                 }
                 # set jwt
                 token = jwt.encode(payload, app.config['SECRET_KEY'], "HS256")
-                response = make_response({"message": "successfully logged in user", "token": token}, 201)
-                response.set_cookie("token", value=token)
+                data = {
+                    "message": "successfully logged in user",
+                    "token": token,
+                    "username": user.get('username'),
+                    "bio": user.get('bio'),
+                    "profile_image": user.get('profile_image')
+                }
+                response = make_response(data, 201)
                 return response
         return bad_request("Invalid email or password")
 
