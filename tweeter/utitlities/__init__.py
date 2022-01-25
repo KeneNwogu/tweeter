@@ -2,6 +2,7 @@ import re
 import hashlib
 from urllib.parse import urlencode, urlparse
 from urllib.request import urljoin
+import cloudinary
 import requests
 
 
@@ -22,6 +23,6 @@ def gravatar_profile_image(email: str):
     return req.url
 
 
-# print(gravatar_profile_image("GeeksforGeeks"))
-
-
+def cloudinary_file_upload(file):
+    data = cloudinary.uploader.upload(file)
+    return dict(data).get('url')

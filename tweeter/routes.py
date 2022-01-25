@@ -11,7 +11,7 @@ from tweeter import app, ALLOWED_EXTENSIONS
 from tweeter.api.auth import login_required, get_current_user
 from tweeter.api.errors import bad_request
 from tweeter import mongo
-from tweeter.utitlities import valid_email, gravatar_profile_image
+from tweeter.utitlities import valid_email, gravatar_profile_image, cloudinary_file_upload
 
 
 @app.route('/register', methods=['POST'])
@@ -41,6 +41,7 @@ def register():
         user = mongo.db.users.insert_one(user_data)
         return {
             "message": "successfully registered user",
+            "email": user_data.get('email'),
             "username": user_data.get('username'),
             "bio": user_data.get('bio'),
             "profile_image": user_data.get('profile_image')
@@ -70,6 +71,7 @@ def login():
                 data = {
                     "message": "successfully logged in user",
                     "token": token,
+                    "email": user.get('email'),
                     "username": user.get('username'),
                     "bio": user.get('bio'),
                     "profile_image": user.get('profile_image')
@@ -117,3 +119,39 @@ def create_post():
             mongo.db.posts.insert_one({"caption": caption, "user": user})
 
     return {"message": "fix it"}
+
+
+@app.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    user = get_current_user()
+    if request.method == 'GET':
+        data = {
+            "username": user.get('username'),
+            "email": user.get('email'),
+            "bio": user.get('bio'),
+            "followers": len(user.get('followers', [])),
+            "following": len(user.get('following', [])),
+            "profile_image": user.get('profile_image')
+        }
+        return data
+
+    if request.method == 'POST':
+        data = request.get_json(force=True)
+        profile_image = request.files.get('profile-image')
+        if not (data or profile_image) or (not data and profile_image.filename == ''):
+            return bad_request('No data was provided')
+        else:
+            if profile_image.filename != '':
+                new_profile_image = cloudinary_file_upload(profile_image)
+                data['profile_image'] = new_profile_image
+
+            mongo.db.users.update_one({'id': user.get('_id')}, {"$set": data})
+            updated_user = mongo.db.users.find_one({'id': user.get('_id')})
+            return {
+                "message": "successfully updated details",
+                "username": updated_user.get('username'),
+                "email": updated_user.get('email'),
+                "bio": updated_user.get('bio'),
+                "profile_image": updated_user.get('profile_image'),
+            }
