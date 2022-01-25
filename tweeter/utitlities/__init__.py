@@ -1,9 +1,24 @@
+import datetime
 import re
 import hashlib
 from urllib.parse import urlencode, urlparse
 from urllib.request import urljoin
 import cloudinary
+import jwt
 import requests
+
+from tweeter import app
+
+
+def create_register_jwt(user_id, secret):
+    payload = {
+        "user_id": str(user_id),
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=10),
+        'iat': datetime.datetime.utcnow()
+    }
+    # set jwt
+    token = jwt.encode(payload, secret, "HS256")
+    return token
 
 
 def valid_email(email):

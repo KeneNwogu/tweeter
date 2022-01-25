@@ -11,7 +11,7 @@ from tweeter import app, ALLOWED_EXTENSIONS
 from tweeter.api.auth import login_required, get_current_user
 from tweeter.api.errors import bad_request
 from tweeter import mongo
-from tweeter.utitlities import valid_email, gravatar_profile_image, cloudinary_file_upload
+from tweeter.utitlities import valid_email, gravatar_profile_image, cloudinary_file_upload, create_register_jwt
 
 
 @app.route('/register', methods=['POST'])
@@ -39,8 +39,10 @@ def register():
             "bio": "Hey there! I'm using Tweeter"
         }
         user = mongo.db.users.insert_one(user_data)
+        token = create_register_jwt(user.inserted_id, app.config['SECRET_KEY'])
         return {
             "message": "successfully registered user",
+            "token": token,
             "email": user_data.get('email'),
             "username": user_data.get('username'),
             "bio": user_data.get('bio'),
@@ -142,12 +144,13 @@ def profile():
         if not (data or profile_image) or (not data and profile_image.filename == ''):
             return bad_request('No data was provided')
         else:
-            if profile_image.filename != '':
-                new_profile_image = cloudinary_file_upload(profile_image)
-                data['profile_image'] = new_profile_image
+            if profile_image:
+                if profile_image.filename != '':
+                    new_profile_image = cloudinary_file_upload(profile_image)
+                    data['profile_image'] = new_profile_image
 
-            mongo.db.users.update_one({'id': user.get('_id')}, {"$set": data})
-            updated_user = mongo.db.users.find_one({'id': user.get('_id')})
+            mongo.db.users.update_one({'_id': user.get('_id')}, {"$set": data})
+            updated_user = mongo.db.users.find_one({'_id': user.get('_id')})
             return {
                 "message": "successfully updated details",
                 "username": updated_user.get('username'),
