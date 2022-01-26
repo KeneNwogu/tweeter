@@ -40,4 +40,4 @@ def gravatar_profile_image(email: str):
 
 def cloudinary_file_upload(file):
     data = cloudinary.uploader.upload(file)
-    return dict(data).get('url')
+    return data.get('url')
