@@ -139,11 +139,16 @@ def profile():
         return data
 
     if request.method == 'POST':
-        data = request.get_json(force=True)
-        profile_image = request.files.get('profile-image')
+        fields = ['username', 'bio']
+        form = request.form
+        profile_image = request.files.get('file')
+        data = {}
         if not (data or profile_image) or (not data and profile_image.filename == ''):
             return bad_request('No data was provided')
         else:
+            for field in fields:
+                if form.get('field'):
+                    data[field] = form.get('field')
             if profile_image:
                 if profile_image.filename != '':
                     new_profile_image = cloudinary_file_upload(profile_image)
