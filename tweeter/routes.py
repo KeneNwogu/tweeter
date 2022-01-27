@@ -147,7 +147,7 @@ def profile():
             return bad_request('No data was provided')
         else:
             for field in fields:
-                if form.get('field'):
+                if form.get(field):
                     data[field] = form.get('field')
             if profile_image:
                 if profile_image.filename != '':
