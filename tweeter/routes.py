@@ -143,7 +143,7 @@ def profile():
         form = request.form
         profile_image = request.files.get('file')
         data = {}
-        if not (data or profile_image) or (not data and profile_image.filename == ''):
+        if not (form or profile_image) or (not form and profile_image.filename == ''):
             return bad_request('No data was provided')
         else:
             for field in fields:
