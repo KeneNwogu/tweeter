@@ -148,7 +148,7 @@ def profile():
         else:
             for field in fields:
                 if form.get(field):
-                    data[field] = form.get('field')
+                    data[field] = form.get(field)
             if profile_image:
                 if profile_image.filename != '':
                     new_profile_image = cloudinary_file_upload(profile_image)
