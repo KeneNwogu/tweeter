@@ -12,6 +12,7 @@ from tweeter.api.auth import login_required, get_current_user
 from tweeter.api.errors import bad_request
 from tweeter import mongo
 from tweeter.utitlities import valid_email, gravatar_profile_image, cloudinary_file_upload, create_register_jwt
+from cloudinary.uploader import upload
 
 
 @app.route('/register', methods=['POST'])
@@ -151,7 +152,7 @@ def profile():
                     data[field] = form.get(field)
             if profile_image:
                 if profile_image.filename != '':
-                    new_profile_image = cloudinary_file_upload(profile_image)
+                    new_profile_image = upload(profile_image).get('url')
                     data['profile_image'] = new_profile_image
 
             mongo.db.users.update_one({'_id': user.get('_id')}, {"$set": data})
