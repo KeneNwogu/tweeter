@@ -3,9 +3,9 @@ import re
 import hashlib
 from urllib.parse import urlencode, urlparse
 from urllib.request import urljoin
-import cloudinary
 import jwt
 import requests
+from cloudinary.uploader import upload
 
 from tweeter import app
 
@@ -39,5 +39,5 @@ def gravatar_profile_image(email: str):
 
 
 def cloudinary_file_upload(file):
-    data = cloudinary.uploader.upload(file)
+    data = upload(file)
     return data.get('url')
