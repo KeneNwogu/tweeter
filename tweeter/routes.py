@@ -140,9 +140,9 @@ def profile():
         return data
 
     if request.method == 'POST':
-        fields = ['username', 'bio']
+        fields = ['username', 'bio', 'email']
         form = request.form
-        profile_image = request.files.get('file')
+        profile_image = request.files.get('profile_image')
         data = {}
         if not (form or profile_image) or (not form and profile_image.filename == ''):
             return bad_request('No data was provided')
