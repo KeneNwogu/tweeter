@@ -40,6 +40,7 @@ def register():
             "bio": "Hey there! I'm using Tweeter"
         }
         user = mongo.db.users.insert_one(user_data)
+        # mongo.db.feed.insert_one({"user_id": user.inserted_id})
         token = create_register_jwt(user.inserted_id, app.config['SECRET_KEY'])
         return {
             "message": "successfully registered user",
@@ -98,30 +99,37 @@ def create_post():
     user = get_current_user()
     form = request.form
     caption = form.get('caption')
-    file = request.files.get('file')
+    files = request.files.getlist('file')
 
     # a file or caption must be provided
-    if not (caption or file) or (caption == '' and file.filename == ''):
+    if not (caption or files) or (caption == '' and files == []):
         return bad_request("must provide a caption or image")
 
     else:
-        if file.filename != '':
-            # handle file upload and posting
-            filename = secure_filename(file.filename)
-            _, ext = os.path.splitext(filename)
-            revised_filename = _ + secrets.token_hex(6) + ext
-            filename = revised_filename
-            if ext not in ALLOWED_EXTENSIONS:
-                return bad_request("file extension not allowed")
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        post_urls = []
+        for file in files:
+            if file.filename != '':
+                # handle file upload and posting
+                filename = secure_filename(file.filename)
+                _, ext = os.path.splitext(filename)
+                if ext not in ALLOWED_EXTENSIONS:
+                    return bad_request("file extension not allowed")
 
-            post = mongo.db.posts.insert_one({"caption": caption, "post_url": filename, "user": user})
-            # TODO create socket and broadcast to user's followers
-            return {"message": file.filename}
-        else:
-            mongo.db.posts.insert_one({"caption": caption, "user": user})
-
-    return {"message": "fix it"}
+                url = cloudinary_file_upload(file).get('url')
+                post_urls.append(url)
+        post = mongo.db.posts.insert_one({"caption": caption, "post_urls": post_urls, "user": user})
+        # TODO create socket and broadcast to user's followers
+        # TODO replace the use of loops for broadcasting
+        followers = mongo.db.followers.find_one({"user_id": user.get('_id')})
+        feed_post = mongo.db.posts.find_one({"_id": post.inserted_id})
+        if followers:
+            for follower in followers:
+                # add feed for follower
+                mongo.db.feed.insert_one({"user_id": follower.get('_id'), "post": feed_post})
+        mongo.db.feed.insert_one({"user_id": user.get('_id'), "post": feed_post})
+        return {
+            "message": "created post"
+        }
 
 
 @app.route('/profile', methods=['GET', 'POST'])
@@ -144,7 +152,7 @@ def profile():
         form = request.form
         profile_image = request.files.get('profile_image')
         data = {}
-        
+
         if 'email' in form:
             email = form.get('email')
             if not valid_email(email):
