@@ -115,7 +115,7 @@ def create_post():
                 if ext not in ALLOWED_EXTENSIONS:
                     return bad_request("file extension not allowed")
 
-                url = cloudinary_file_upload(file).get('url')
+                url = cloudinary_file_upload(file)
                 post_urls.append(url)
         post = mongo.db.posts.insert_one({"caption": caption, "post_urls": post_urls, "user": user})
         # TODO create socket and broadcast to user's followers
