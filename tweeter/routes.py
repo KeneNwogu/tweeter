@@ -117,7 +117,7 @@ def create_post():
 
                 url = cloudinary_file_upload(file)
                 post_urls.append(url)
-        post = mongo.db.posts.insert_one({"caption": caption, "post_urls": post_urls, "user": user})
+        post = mongo.db.posts.insert_one({"caption": caption, "post_urls": post_urls, "user": user.get('_id')})
         # TODO create socket and broadcast to user's followers
         # TODO replace the use of loops for broadcasting
         followers = mongo.db.followers.find_one({"user_id": user.get('_id')})
