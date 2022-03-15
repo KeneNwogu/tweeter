@@ -14,6 +14,10 @@ from tweeter import mongo
 from tweeter.utitlities import valid_email, gravatar_profile_image, cloudinary_file_upload, create_register_jwt
 from cloudinary.uploader import upload
 
+dummy_posts = [
+
+]
+
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -40,7 +44,12 @@ def register():
             "bio": "Hey there! I'm using Tweeter"
         }
         user = mongo.db.users.insert_one(user_data)
-        # mongo.db.feed.insert_one({"user_id": user.inserted_id})
+
+        fake_tweets = list(mongo.db.posts.find({"fake": True}))
+        for tweet in fake_tweets:
+            tweet['user_id'] = user.inserted_id
+            mongo.db.feed.insert_one({"user_id": user.inserted_id}, tweet)
+
         token = create_register_jwt(user.inserted_id, app.config['SECRET_KEY'])
         return {
             "message": "successfully registered user",
@@ -100,6 +109,7 @@ def create_post():
     form = request.form
     caption = form.get('caption')
     files = request.files.getlist('file')
+    restricted = form.get('restricted', False)
 
     # a file or caption must be provided
     if not (caption or files) or (caption == '' and files == []):
@@ -117,7 +127,8 @@ def create_post():
 
                 url = cloudinary_file_upload(file)
                 post_urls.append(url)
-        post = mongo.db.posts.insert_one({"caption": caption, "post_urls": post_urls, "user": user.get('_id')})
+        post = mongo.db.posts.insert_one({"caption": caption, "post_urls": post_urls, "user": user.get('_id'),
+                                          "restricted": restricted})
         # TODO create socket and broadcast to user's followers
         # TODO replace the use of loops for broadcasting
         followers = mongo.db.followers.find_one({"user_id": user.get('_id')})
