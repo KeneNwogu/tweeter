@@ -2,6 +2,7 @@ import datetime
 import os
 import secrets
 
+import bson
 import jwt
 from flask import request, make_response
 from flask_cors import cross_origin
@@ -190,3 +191,10 @@ def profile():
                 "bio": updated_user.get('bio'),
                 "profile_image": updated_user.get('profile_image'),
             }
+
+
+@app.route('/feed')
+@login_required
+def posts():
+    current_user_id = get_current_user().get('_id')
+    return bson.json_util.dumps(list(mongo.db.feed.find({'user_id': current_user_id})))
