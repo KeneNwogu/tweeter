@@ -190,8 +190,17 @@ def profile():
 
 @app.route('/feed')
 @login_required
-def posts():
+def post_feed():
     current_user_id = get_current_user().get('_id')
-    feed = bson.json_util.dumps(list(mongo.db.feed.find({'user_id': current_user_id}))) or \
-           bson.json_util.dumps(list(mongo.db.posts.find({'fake': True})))
+    pipeline = [
+        {
+            "$lookup": {
+                "from": "users",
+                "localField": "user",
+                "foreignField": "_id",
+                "as": "user"
+            }
+        }
+    ]
+    feed = bson.json_util.dumps(list(mongo.db.posts.aggregate(pipeline)))
     return feed
