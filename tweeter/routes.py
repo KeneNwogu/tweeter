@@ -46,11 +46,6 @@ def register():
         }
         user = mongo.db.users.insert_one(user_data)
 
-        fake_tweets = list(mongo.db.posts.find({"fake": True}))
-        for tweet in fake_tweets:
-            tweet['user_id'] = user.inserted_id
-            mongo.db.feed.insert_one({"user_id": user.inserted_id}, tweet)
-
         token = create_register_jwt(user.inserted_id, app.config['SECRET_KEY'])
         return {
             "message": "successfully registered user",
