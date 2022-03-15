@@ -197,4 +197,6 @@ def profile():
 @login_required
 def posts():
     current_user_id = get_current_user().get('_id')
-    return bson.json_util.dumps(list(mongo.db.feed.find({'user_id': current_user_id})))
+    feed = bson.json_util.dumps(list(mongo.db.feed.find({'user_id': current_user_id}))) or \
+           bson.json_util.dumps(list(mongo.db.posts.find({'fake': True})))
+    return feed
