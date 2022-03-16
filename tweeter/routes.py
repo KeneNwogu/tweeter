@@ -3,7 +3,9 @@ import os
 import secrets
 
 import bson
+from bson import json_util
 import jwt
+from bson import ObjectId
 from flask import request, make_response
 from flask_cors import cross_origin
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -189,10 +191,13 @@ def profile():
 
 
 @app.route('/feed')
-@login_required
+# @login_required
 def post_feed():
-    current_user_id = get_current_user().get('_id')
+    current_user_id = ObjectId('61de0bbfbe93818169109f14')
     pipeline = [
+        {
+            "$match": {"fake": True}
+        },
         {
             "$lookup": {
                 "from": "users",
@@ -202,5 +207,5 @@ def post_feed():
             }
         }
     ]
-    feed = bson.json_util.dumps(list(mongo.db.posts.aggregate(pipeline)))
+    feed = json_util.dumps(list(mongo.db.posts.aggregate(pipeline)))
     return feed
