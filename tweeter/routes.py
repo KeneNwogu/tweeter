@@ -126,7 +126,9 @@ def create_post():
                 url = cloudinary_file_upload(file)
                 post_urls.append(url)
         post = mongo.db.posts.insert_one({"caption": caption, "post_urls": post_urls, "user": user.get('_id'),
-                                          "restricted": restricted, 'comments': 0, 'retweets': 0, 'likes': 0})
+                                          "restricted": restricted, 'comments': 0, 'retweets': 0, 'likes': 0,
+                                          'createdAt': datetime.datetime.utcnow()
+                                          })
         # TODO create socket and broadcast to user's followers
         # TODO replace the use of loops for broadcasting
         followers = mongo.db.followers.find_one({"user_id": user.get('_id')})

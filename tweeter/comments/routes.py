@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import Blueprint, request
 from bson import json_util, ObjectId
 from tweeter import mongo
@@ -47,7 +48,8 @@ def comment(post_id):
                 'comments': 0,
                 'retweets': 0,
                 'likes': 0,
-                'user': user.get('_id')
+                'user': user.get('_id'),
+                'createdAt': datetime.utcnow()
             }
             mongo.db.comments.insert_one(data)
             return {
