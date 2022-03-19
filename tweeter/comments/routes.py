@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 from bson import json_util, ObjectId
 from tweeter import mongo
-from tweeter.api.auth import login_required
+from tweeter.api.auth import login_required, get_current_user
 from tweeter.api.errors import resource_not_found
 from tweeter.utitlities import upload_files
 
@@ -12,10 +12,24 @@ comments = Blueprint('comments', __name__)
 @login_required
 def comment(post_id):
     if request.method == 'GET':
-        comments_response = mongo.db.comments.find({'post': ObjectId(post_id)})
+        pipeline = [
+            {
+                "$match": {"post": ObjectId(post_id)}
+            },
+            {
+                "$lookup": {
+                    "from": "users",
+                    "localField": "user",
+                    "foreignField": "_id",
+                    "as": "user"
+                }
+            }
+        ]
+        comments_response = mongo.db.comments.aggregate(pipeline)
         return json_util.dumps(list(comments_response))
 
     if request.method == 'POST':
+        user = get_current_user()
         form = request.form
         files = request.files.getlist('file')
         post = mongo.db.posts.find_one({'_id': ObjectId(post_id)})
@@ -26,16 +40,19 @@ def comment(post_id):
                 }
             })
             post_urls = upload_files(files)
-            mongo.db.comments.insert_one({
+            data = {
                 'post': ObjectId(post_id),
                 'caption': form.get('caption'),
                 'images': post_urls,
                 'comments': 0,
                 'retweets': 0,
-                'likes': 0
-            })
+                'likes': 0,
+                'user': user.get('_id')
+            }
+            mongo.db.comments.insert_one(data)
             return {
                 "message": "successfully commented",
+                'comment': data
             }
         else:
             # 404 message
