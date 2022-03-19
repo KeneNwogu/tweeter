@@ -126,7 +126,7 @@ def create_post():
                 url = cloudinary_file_upload(file)
                 post_urls.append(url)
         post = mongo.db.posts.insert_one({"caption": caption, "post_urls": post_urls, "user": user.get('_id'),
-                                          "restricted": restricted})
+                                          "restricted": restricted, 'comments': 0, 'retweets': 0, 'likes': 0})
         # TODO create socket and broadcast to user's followers
         # TODO replace the use of loops for broadcasting
         followers = mongo.db.followers.find_one({"user_id": user.get('_id')})
@@ -191,9 +191,9 @@ def profile():
 
 
 @app.route('/feed')
-# @login_required
+@login_required
 def post_feed():
-    current_user_id = ObjectId('61de0bbfbe93818169109f14')
+    current_user_id = get_current_user().get('_id')
     pipeline = [
         {
             "$match": {"fake": True}
@@ -209,3 +209,5 @@ def post_feed():
     ]
     feed = json_util.dumps(list(mongo.db.posts.aggregate(pipeline)))
     return feed
+
+

@@ -1,4 +1,5 @@
 import datetime
+import os
 import re
 import hashlib
 from urllib.parse import urlencode, urlparse
@@ -6,8 +7,10 @@ from urllib.request import urljoin
 import jwt
 import requests
 from cloudinary.uploader import upload
+from werkzeug.utils import secure_filename
 
-from tweeter import app
+from tweeter import app, ALLOWED_EXTENSIONS
+from tweeter.api.errors import bad_request
 
 
 def create_register_jwt(user_id, secret):
@@ -41,3 +44,18 @@ def gravatar_profile_image(email: str):
 def cloudinary_file_upload(file):
     data = upload(file)
     return data.get('url')
+
+
+def upload_files(files):
+    post_urls = []
+    for file in files:
+        if file.filename != '':
+            # handle file upload and posting
+            filename = secure_filename(file.filename)
+            _, ext = os.path.splitext(filename)
+            if ext not in ALLOWED_EXTENSIONS:
+                return bad_request("file extension not allowed")
+
+            url = cloudinary_file_upload(file)
+            post_urls.append(url)
+    return post_urls

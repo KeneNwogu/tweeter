@@ -27,5 +27,7 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 mongo.init_app(app)
 
 from tweeter import routes
+from tweeter.comments.routes import comments
 
-# add
+
+app.register_blueprint(comments)
