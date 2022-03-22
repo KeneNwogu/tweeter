@@ -31,7 +31,7 @@ def login_required(f):
                 jwt.decode(jwt_cookie, app.config['SECRET_KEY'], 'HS256')
             except (jwt.exceptions.InvalidSignatureError, jwt.exceptions.ExpiredSignatureError,
                     jwt.exceptions.DecodeError) as e:
-                return bad_request("Invalid or expired authentication token.")
+                return bad_request(f"Invalid or expired authentication token. Token: {jwt_cookie}")
             else:
                 return f(*args, **kwargs)
         else:
