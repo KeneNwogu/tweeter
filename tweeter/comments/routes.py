@@ -24,7 +24,8 @@ def comment(post_id):
                     "foreignField": "_id",
                     "as": "user"
                 }
-            }
+            },
+            {"$unwind": "$user"}
         ]
         comments_response = mongo.db.comments.aggregate(pipeline)
         return json_util.dumps(list(comments_response))

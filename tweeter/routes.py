@@ -207,7 +207,8 @@ def post_feed():
                 "foreignField": "_id",
                 "as": "user"
             }
-        }
+        },
+        {"$unwind": "$user"}
     ]
     feed = json_util.dumps(list(mongo.db.posts.aggregate(pipeline)))
     return feed
