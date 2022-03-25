@@ -32,7 +32,7 @@ def comment(post_id):
             "post": mongo.db.posts.find_one({'_id': ObjectId(post_id)}),
             "comments": comments_response
         }
-        return json_util.dumps(list(response))
+        return json_util.dumps(response)
 
     if request.method == 'POST':
         user = get_current_user()
