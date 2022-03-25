@@ -28,7 +28,11 @@ def comment(post_id):
             {"$unwind": "$user"}
         ]
         comments_response = mongo.db.comments.aggregate(pipeline)
-        return json_util.dumps(list(comments_response))
+        response = {
+            "post": mongo.db.posts.find_one({'_id': ObjectId(post_id)}),
+            "comments": comments_response
+        }
+        return json_util.dumps(list(response))
 
     if request.method == 'POST':
         user = get_current_user()
