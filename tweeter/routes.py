@@ -44,7 +44,9 @@ def register():
             "username": email,
             "password_hash": password_hash,
             "profile_image": profile_image,
-            "bio": "Hey there! I'm using Tweeter"
+            "bio": "Hey there! I'm using Tweeter",
+            "followers": 0,
+            "following": 0
         }
         user = mongo.db.users.insert_one(user_data)
 

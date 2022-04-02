@@ -8,7 +8,6 @@ from tweeter.api.auth import login_required, get_current_user
 from tweeter.api.errors import resource_not_found
 from tweeter.utitlities import upload_files
 
-
 posts = Blueprint('posts', __name__)
 
 
@@ -19,10 +18,14 @@ def like_post(post_id):
     if not mongo.db.likes.find_one({'post': ObjectId(post_id), 'user': user.get('_id')}):
         mongo.db.posts.update_one({'_id': ObjectId(post_id)}, {
             "$inc": {
-                "likes"
+                "likes": 1
             }
         })
         mongo.db.likes.insert_one({'post': ObjectId(post_id), 'user': user.get('_id')})
+        return {
+            'message': 'success',
+            'liked': True
+        }
 
     else:
         mongo.db.posts.update_one({'_id': ObjectId(post_id)}, {
@@ -31,9 +34,10 @@ def like_post(post_id):
             }
         })
         mongo.db.likes.delete_one({'post': ObjectId(post_id), 'user': user.get('_id')})
-    return {
-        'message': 'success'
-    }
+        return {
+            'message': 'success',
+            'liked': False
+        }
 
 
 @posts.route('/<post_id>/bookmark')
@@ -43,7 +47,7 @@ def bookmark_post(post_id):
     if not mongo.db.bookmarks.find_one({'user': user.get('_id')}):
         mongo.db.posts.update_one({'_id': ObjectId(post_id)}, {
             "$inc": {
-                "bookmarks"
+                "bookmarks": 1
             }
         })
         mongo.db.bookmarks.insert_one({'user': user.get('_id'), 'posts': [ObjectId(post_id)]})

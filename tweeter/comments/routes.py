@@ -9,7 +9,7 @@ from tweeter.utitlities import upload_files
 comments = Blueprint('comments', __name__)
 
 
-@comments.route('/<post_id>/comments')
+@comments.route('/<post_id>/comments', methods=['GET', 'POST'])
 @login_required
 def comment(post_id):
     if request.method == 'GET':
@@ -42,7 +42,7 @@ def comment(post_id):
         if post:
             mongo.db.posts.update_one({'_id': ObjectId(post_id)}, {
                 "$inc": {
-                    "comments"
+                    "comments": 1
                 }
             })
             post_urls = upload_files(files)
@@ -57,10 +57,10 @@ def comment(post_id):
                 'createdAt': datetime.utcnow()
             }
             mongo.db.comments.insert_one(data)
-            return {
+            return json_util.dumps({
                 "message": "successfully commented",
                 'comment': data
-            }
+            })
         else:
             # 404 message
             return resource_not_found('Post has been deleted or not found')

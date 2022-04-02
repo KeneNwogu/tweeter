@@ -28,6 +28,9 @@ mongo.init_app(app)
 
 from tweeter import routes
 from tweeter.comments.routes import comments
-
+from tweeter.users.routes import users
+from tweeter.posts.routes import posts
 
 app.register_blueprint(comments)
+app.register_blueprint(users)
+app.register_blueprint(posts)
