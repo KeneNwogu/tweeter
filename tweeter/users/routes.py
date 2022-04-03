@@ -21,12 +21,25 @@ def follow_user(user_id):
             }
         })
         mongo.db.followers.insert_one({'user': ObjectId(user_id), 'follower': user})
+        data = {
+            "message": "success",
+            "followers": len(list(mongo.db.followers.find({'user': ObjectId(user_id)}))),
+            "following": True
+        }
         return {
-            "message": "success"
+            "message": "success",
+            "followers": len(list(mongo.db.followers.find({'user': ObjectId(user_id)}))),
+            "following": True
         }
     else:
         if not mongo.db.users.find_one({'_id': ObjectId(user_id)}):
             return resource_not_found('user does not exist')
+        else:
+            return {
+                "message": "you are already following this user",
+                "followers": len(list(mongo.db.followers.find({'user': ObjectId(user_id)}))),
+                "following": True
+            }
 
 
 @users.route('/<user_id>/unfollow')
