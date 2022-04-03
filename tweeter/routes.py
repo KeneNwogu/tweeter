@@ -84,6 +84,7 @@ def login():
                 data = {
                     "message": "successfully logged in user",
                     "token": token,
+                    "_id": user.get('_id'),
                     "email": user.get('email'),
                     "username": user.get('username'),
                     "bio": user.get('bio'),

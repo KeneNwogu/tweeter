@@ -21,11 +21,6 @@ def follow_user(user_id):
             }
         })
         mongo.db.followers.insert_one({'user': ObjectId(user_id), 'follower': user})
-        data = {
-            "message": "success",
-            "followers": len(list(mongo.db.followers.find({'user': ObjectId(user_id)}))),
-            "following": True
-        }
         return {
             "message": "success",
             "followers": len(list(mongo.db.followers.find({'user': ObjectId(user_id)}))),

@@ -27,9 +27,24 @@ def comment(post_id):
             },
             {"$unwind": "$user"}
         ]
+        post_pipeline = [
+            {
+                "$match": {"_id": ObjectId(post_id)}
+            },
+            {
+                "$lookup": {
+                    "from": "users",
+                    "localField": "user",
+                    "foreignField": "_id",
+                    "as": "user"
+                }
+            },
+            {"$unwind": "$user"}
+        ]
+        post = list(mongo.db.posts.aggregate(post_pipeline))[0]
         comments_response = mongo.db.comments.aggregate(pipeline)
         response = {
-            "post": mongo.db.posts.find_one({'_id': ObjectId(post_id)}),
+            "post": post,
             "comments": comments_response
         }
         return json_util.dumps(response)
