@@ -24,7 +24,8 @@ def like_post(post_id):
         mongo.db.likes.insert_one({'post': ObjectId(post_id), 'user': user.get('_id')})
         return {
             'message': 'success',
-            'liked': True
+            'liked': True,
+            'likes': mongo.db.posts.find_one({'_id': ObjectId(post_id)}).get('likes')
         }
 
     else:
@@ -36,7 +37,8 @@ def like_post(post_id):
         mongo.db.likes.delete_one({'post': ObjectId(post_id), 'user': user.get('_id')})
         return {
             'message': 'success',
-            'liked': False
+            'liked': False,
+            'likes': mongo.db.posts.find_one({'_id': ObjectId(post_id)}).get('likes')
         }
 
 
