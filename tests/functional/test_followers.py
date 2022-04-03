@@ -14,14 +14,8 @@ user1 = mongo.db.users.insert_one({
     "following": 0
 })
 
-user2 = mongo.db.users.insert_one({
-    "email": 'test_email@test.com',
+user2 = mongo.db.users.find_one({
     "username": 'Test User2',
-    "password_hash": 'hashed password',
-    "profile_image": 'fake_profile_image_url',
-    "bio": "Hey there! I'm using Tweeter",
-    "followers": 0,
-    "following": 0
 })
 
 
@@ -46,8 +40,8 @@ def test_following_list(client, headers):
 
 
 def test_follow_user(client, headers):
-    follower = mongo.db.users.find_one({'_id': ObjectId(logged_in_user.inserted_id)})
-    user = mongo.db.users.find_one({'_id': user2.inserted_id})
+    follower = mongo.db.users.find_one({'_id': ObjectId(logged_in_user.get('_id'))})
+    user = mongo.db.users.find_one({'_id': user2.get('_id')})
     old_followers = user.get('followers')
     url = f'/{str(user.get("_id"))}/follow'
     response = client.get(url, headers=headers)
