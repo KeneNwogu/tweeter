@@ -4,8 +4,11 @@ import re
 import hashlib
 from urllib.parse import urlencode, urlparse
 from urllib.request import urljoin
+
+import bson
 import jwt
 import requests
+from bson import ObjectId
 from cloudinary.uploader import upload
 from werkzeug.utils import secure_filename
 
@@ -59,3 +62,12 @@ def upload_files(files):
             url = cloudinary_file_upload(file)
             post_urls.append(url)
     return post_urls
+
+
+def validate_id(_id):
+    try:
+        _id = ObjectId(_id)
+    except bson.errors.InvalidId:
+        return bad_request(f"Invalid userID of {_id} was passed in the url")
+    else:
+        return _id

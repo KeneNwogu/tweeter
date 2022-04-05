@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash
 from tweeter import mongo, app
 from tweeter.api.auth import login_required, get_current_user
 from tweeter.api.errors import resource_not_found, unauthorised, bad_request
-from tweeter.utitlities import valid_email, gravatar_profile_image, create_register_jwt
+from tweeter.utitlities import valid_email, gravatar_profile_image, create_register_jwt, validate_id
 
 users = Blueprint('users', __name__)
 
@@ -54,7 +54,8 @@ def register():
 @login_required
 def profile(user_id):
     user_in_session = get_current_user()
-    user = mongo.db.users.find_one({'_id': ObjectId(user_id)})
+    user_id = validate_id(user_id)
+    user = mongo.db.users.find_one({'_id': user_id})
     if user is None:
         resource_not_found('This user has has been deleted or deactivated')
     if request.method == 'GET':
