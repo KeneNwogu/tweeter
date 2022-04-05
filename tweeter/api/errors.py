@@ -17,3 +17,7 @@ def bad_request(message):
 
 def resource_not_found(message):
     return error_response(404, message)
+
+
+def unauthorised(message):
+    return error_response(403, message)

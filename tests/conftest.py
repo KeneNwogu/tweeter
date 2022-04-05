@@ -16,6 +16,10 @@ def client():
     app.config['TESTING'] = True
     with app.test_client() as test_client:
         yield test_client
+        mongo.db.posts.drop()
+        mongo.db.followers.drop()
+        mongo.db.comments.drop()
+        mongo.db.likes.drop()
 
 
 @pytest.fixture(scope='module')
@@ -30,7 +34,8 @@ def headers():
     secret = os.environ.get('SECRET_KEY') or 'you-dey-waste-your-time'
     token = jwt.encode(payload, secret, "HS256")
     return {
-        'Authorization': token
+        'Authorization': token,
+        'user_id': str(logged_in_user.get('_id')) # to get user id for testing, not required in actual headers
     }
 
 
