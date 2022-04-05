@@ -70,10 +70,10 @@ def profile(user_id):
         if str(user_in_session.get('_id')) == str(user.get('_id')):
             data['self'] = True
             data['follows_you'] = False
-            data['following'] = False
+            data['you_follow'] = False
         else:
             data['self'] = False
-            data['following'] = True if mongo.db.followers.find_one({
+            data['you_follow'] = True if mongo.db.followers.find_one({
                 'user': ObjectId(user.get('_id')),
                 'follower': ObjectId(user_in_session.get('_id'))
             }) else False
