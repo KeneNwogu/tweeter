@@ -104,7 +104,15 @@ def post_feed():
                     "then": True,
                     "else": False
                 }
-            }
+            },
+            "caption": 1,
+            "post_urls": 1,
+            "user": 1,
+            "restricted": 1,
+            'comments': 1,
+            'retweets': 1,
+            'likes': 1,
+            'createdAt': 1
         }}
     ]
     feed = json_util.dumps(list(mongo.db.posts.aggregate(pipeline)))
