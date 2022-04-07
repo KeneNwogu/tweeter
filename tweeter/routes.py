@@ -1,18 +1,16 @@
 import datetime
-import os
 
 import jwt
 from bson import json_util
 from flask import request, make_response
 from flask_cors import cross_origin
 from werkzeug.security import check_password_hash
-from werkzeug.utils import secure_filename
 
-from tweeter import app, ALLOWED_EXTENSIONS
+from tweeter import app
 from tweeter import mongo
 from tweeter.api.auth import login_required, get_current_user
 from tweeter.api.errors import bad_request
-from tweeter.utitlities import cloudinary_file_upload
+from tweeter.utitlities import upload_files
 
 
 @app.route('/login', methods=['POST'])
@@ -63,30 +61,12 @@ def create_post():
         return bad_request("must provide a caption or image")
 
     else:
-        post_urls = []
-        for file in files:
-            if file.filename != '':
-                # handle file upload and posting
-                filename = secure_filename(file.filename)
-                _, ext = os.path.splitext(filename)
-                if ext not in ALLOWED_EXTENSIONS:
-                    return bad_request("file extension not allowed")
-
-                url = cloudinary_file_upload(file)
-                post_urls.append(url)
+        post_urls = upload_files(files)
         post = mongo.db.posts.insert_one({"caption": caption, "post_urls": post_urls, "user": user.get('_id'),
                                           "restricted": restricted, 'comments': 0, 'retweets': 0, 'likes': 0,
                                           'createdAt': datetime.datetime.utcnow()
                                           })
         # TODO create socket and broadcast to user's followers
-        # TODO replace the use of loops for broadcasting
-        followers = mongo.db.followers.find_one({"user_id": user.get('_id')})
-        feed_post = mongo.db.posts.find_one({"_id": post.inserted_id})
-        if followers:
-            for follower in followers:
-                # add feed for follower
-                mongo.db.feed.insert_one({"user_id": follower.get('_id'), "post": feed_post})
-        mongo.db.feed.insert_one({"user_id": user.get('_id'), "post": feed_post})
         return {
             "message": "created post"
         }
@@ -96,9 +76,15 @@ def create_post():
 @login_required
 def post_feed():
     current_user_id = get_current_user().get('_id')
+    following = list(mongo.db.followers.find({'follower': current_user_id}))
+    following_ids = list(map(lambda x: x.get('user'), following))
+    user_likes = list(mongo.db.likes.find({'user': current_user_id}))
+    liked_posts = list(map(lambda x: x.get('post'), user_likes))
     pipeline = [
         {
-            "$match": {"fake": True}
+            "$match": {
+                "$or": [{"fake": True}, {"user": {"$in": following_ids}}]
+            },
         },
         {
             "$lookup": {
@@ -108,9 +94,19 @@ def post_feed():
                 "as": "user"
             }
         },
-        {"$unwind": "$user"}
+        {"$unwind": "$user"},
+        {"$project": {
+            "liked": {
+                "$cond": {
+                    "if": {
+                        "$in": ["$_id", liked_posts]
+                    },
+                    "then": True,
+                    "else": False
+                }
+            }
+        }}
     ]
     feed = json_util.dumps(list(mongo.db.posts.aggregate(pipeline)))
+    print(feed)
     return feed
-
-
