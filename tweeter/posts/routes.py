@@ -46,19 +46,16 @@ def like_post(post_id):
 @login_required
 def bookmark_post(post_id):
     user = get_current_user()
-    if not mongo.db.bookmarks.find_one({'user': user.get('_id')}):
-        mongo.db.posts.update_one({'_id': ObjectId(post_id)}, {
-            "$inc": {
-                "bookmarks": 1
-            }
-        })
-        mongo.db.bookmarks.insert_one({'user': user.get('_id'), 'posts': [ObjectId(post_id)]})
-    else:
-        mongo.db.bookmarks.update_one({'user': user.get('_id')}, {
-            '$addToSet': {
-                'posts': ObjectId(post_id)
-            }
-        })
+    mongo.db.posts.update_one({'_id': ObjectId(post_id)}, {
+        "$inc": {
+            "bookmarks": 1
+        }
+    })
+    mongo.db.users.update_one({'user': user.get('_id')}, {
+        '$addToSet': {
+            'posts': ObjectId(post_id)
+        }
+    })
     return {
         'message': 'success'
     }

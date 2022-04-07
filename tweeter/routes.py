@@ -116,5 +116,4 @@ def post_feed():
         }}
     ]
     feed = json_util.dumps(list(mongo.db.posts.aggregate(pipeline)))
-    print(feed)
     return feed

@@ -10,3 +10,11 @@ def test_profile(client, headers):
     assert response.status_code == 200
     assert data.get('self') is True
     assert data.get('follows_you') is False
+
+
+def test_bookmarks(client, headers, mock_post):
+    url = f'/{mock_post}/bookmark'
+    response = client.get(url, headers=headers)
+    data = json_util.loads(response.data)
+    assert response.status_code == 200
+    assert data['message'] == 'success'
