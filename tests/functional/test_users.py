@@ -18,3 +18,13 @@ def test_bookmarks(client, headers, mock_post):
     data = json_util.loads(response.data)
     assert response.status_code == 200
     assert data['message'] == 'success'
+
+
+def test_user_bookmarks(client, headers, mock_post):
+    book_url = f'/{mock_post}/bookmark'
+    book_response = client.get(book_url, headers=headers)
+    url = f'/bookmarks'
+    response = client.get(url, headers=headers)
+    data = json_util.loads(response.data)
+    assert response.status_code == 200
+    assert type(data) == list

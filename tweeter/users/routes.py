@@ -1,3 +1,5 @@
+from pprint import pprint
+
 from bson import json_util, ObjectId
 from cloudinary.uploader import upload
 from flask import Blueprint, request
@@ -207,3 +209,40 @@ def user_following(user_id):
     ]
     following = mongo.db.followers.aggregate(pipeline)
     return json_util.dumps(following)
+
+
+@users.route('/bookmarks')
+@login_required
+def user_bookmarks():
+    current_user_id = get_current_user().get('_id')
+    # aggregation
+    pipeline = [
+        {
+            "$match": {"_id": ObjectId(current_user_id)}
+        },
+        {
+            "$lookup": {
+                "from": "posts",
+                "localField": "bookmarks",
+                "foreignField": "_id",
+                "as": "bookmarks"
+            }
+        },
+        {"$unwind": "$bookmarks"},
+        {
+            "$lookup": {
+                "from": "users",
+                "localField": "bookmarks.user",
+                "foreignField": "_id",
+                "as": "bookmarks.user"
+            }
+        },
+        {"$unwind": "$bookmarks"},
+        {
+            "$project": {
+                "bookmarks.user.bookmarks": 0
+            }
+        }
+    ]
+    bookmarks = list(mongo.db.users.aggregate(pipeline))
+    return json_util.dumps(bookmarks)
