@@ -240,9 +240,9 @@ def user_bookmarks():
         {"$unwind": "$bookmarks"},
         {
             "$project": {
-                "bookmarks.user.bookmarks": 0
+                "bookmarks.user.bookmarks": 0,
             }
         }
     ]
-    bookmarks = list(mongo.db.users.aggregate(pipeline))
+    bookmarks = list(mongo.db.users.aggregate(pipeline))[0]
     return json_util.dumps(bookmarks)
