@@ -47,7 +47,7 @@ def like_post(post_id):
 def bookmark_post(post_id):
     post_id = validate_id(post_id)
     user = get_current_user()
-    if post_id not in mongo.db.users.find_one({'_id': user.get('_id')}).get('bookmarks'):
+    if post_id not in mongo.db.users.find_one({'_id': user.get('_id')}).get('bookmarks', []):
         mongo.db.posts.update_one({'_id': ObjectId(post_id)}, {
             "$inc": {
                 "bookmarks": 1
