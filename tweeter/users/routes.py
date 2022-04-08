@@ -244,5 +244,6 @@ def user_bookmarks():
             }
         }
     ]
-    bookmarks = list(mongo.db.users.aggregate(pipeline))[0]
+    bookmarks = list(mongo.db.users.aggregate(pipeline))
+    bookmarks = bookmarks[0] if len(bookmarks) > 0 else {'bookmarks': []}
     return json_util.dumps(bookmarks)
