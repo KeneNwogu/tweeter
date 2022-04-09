@@ -237,7 +237,7 @@ def user_bookmarks():
                 "as": "bookmarks.user"
             }
         },
-        {"$unwind": "$bookmarks"},
+        {"$unwind": "$bookmarks.user"},
         {
             "$project": {
                 "bookmarks.user.bookmarks": 0,
