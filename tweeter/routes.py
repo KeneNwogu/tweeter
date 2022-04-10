@@ -117,7 +117,7 @@ def post_feed():
     ]
     feed = json_util.dumps(list(mongo.db.posts.aggregate(pipeline)))
     for post in feed:
-        if post.get('_id') in liked_posts:
+        if post in liked_posts:
             post['liked'] = True
         else:
             post['liked'] = False

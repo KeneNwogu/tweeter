@@ -233,6 +233,6 @@ def user_bookmarks():
     bookmarks = list(mongo.db.users.aggregate(pipeline))
     bookmarks = bookmarks[0] if len(bookmarks) > 0 else {'bookmarks': []}
     for b in bookmarks['bookmarks']:
-        b['user'] = mongo.db.users.find_one({'_id': b['user']['_id']})
+        b['user'] = mongo.db.users.find_one({'_id': b['user']})
 
     return json_util.dumps(bookmarks)
