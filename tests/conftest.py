@@ -16,10 +16,10 @@ def client():
     app.config['TESTING'] = True
     with app.test_client() as test_client:
         yield test_client
-        # mongo.db.posts.drop()
-        # mongo.db.followers.drop()
-        # mongo.db.comments.drop()
-        # mongo.db.likes.drop()
+        mongo.db.posts.drop()
+        mongo.db.followers.drop()
+        mongo.db.comments.drop()
+        mongo.db.likes.drop()
 
 
 @pytest.fixture(scope='module')

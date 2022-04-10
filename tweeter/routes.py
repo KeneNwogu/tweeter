@@ -96,15 +96,15 @@ def post_feed():
         },
         {"$unwind": "$user"},
         {"$project": {
-            "liked": {
-                "$cond": {
-                    "if": {
-                        "$in": ["$_id", liked_posts]
-                    },
-                    "then": True,
-                    "else": False
-                }
-            },
+            # "liked": {
+            #     "$cond": {
+            #         "if": {
+            #             "$in": ["$_id", liked_posts]
+            #         },
+            #         "then": True,
+            #         "else": False
+            #     }
+            # },
             "caption": 1,
             "post_urls": 1,
             "user": 1,
@@ -115,10 +115,11 @@ def post_feed():
             'createdAt': 1
         }}
     ]
-    feed = json_util.dumps(list(mongo.db.posts.aggregate(pipeline)))
-    for post in feed:
+    response = list(mongo.db.posts.aggregate(pipeline))
+    for post in response:
         if post in liked_posts:
             post['liked'] = True
         else:
             post['liked'] = False
+    feed = json_util.dumps(response)
     return feed
