@@ -21,8 +21,12 @@ def test_bookmarks(client, headers, mock_post):
 
 
 def test_user_bookmarks(client, headers, mock_post):
+    url = f'/{mock_post}/bookmark'
+    response = client.get(url, headers=headers)
+
     url = f'/bookmarks'
     response = client.get(url, headers=headers)
     data = json_util.loads(response.data)
     assert response.status_code == 200
     assert type(data) == dict
+    assert type(data['bookmarks']) == dict

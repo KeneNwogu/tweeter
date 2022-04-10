@@ -215,6 +215,7 @@ def user_following(user_id):
 @login_required
 def user_bookmarks():
     current_user_id = get_current_user().get('_id')
+    print('user', mongo.db.users.find_one({'_id': current_user_id}))
     # aggregation
     pipeline = [
         {
@@ -227,23 +228,11 @@ def user_bookmarks():
                 "foreignField": "_id",
                 "as": "bookmarks"
             }
-        },
-        {"$unwind": "$bookmarks"},
-        {
-            "$lookup": {
-                "from": "users",
-                "localField": "bookmarks.user",
-                "foreignField": "_id",
-                "as": "bookmarks.user"
-            }
-        },
-        {"$unwind": "$bookmarks.user"},
-        {
-            "$project": {
-                "bookmarks.user.bookmarks": 0,
-            }
         }
     ]
     bookmarks = list(mongo.db.users.aggregate(pipeline))
     bookmarks = bookmarks[0] if len(bookmarks) > 0 else {'bookmarks': []}
+    for b in bookmarks['bookmarks']:
+        b['user'] = mongo.db.users.find_one({'_id': b['user']['_id']})
+
     return json_util.dumps(bookmarks)
