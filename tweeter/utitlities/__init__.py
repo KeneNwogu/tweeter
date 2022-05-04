@@ -19,7 +19,7 @@ from tweeter.api.errors import bad_request
 def create_register_jwt(user_id, secret):
     payload = {
         "user_id": str(user_id),
-        'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=10),
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=50),
         'iat': datetime.datetime.utcnow()
     }
     # set jwt
