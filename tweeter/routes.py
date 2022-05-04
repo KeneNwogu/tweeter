@@ -120,7 +120,7 @@ def post_feed():
     ]
     response = list(mongo.db.posts.aggregate(pipeline))
     for post in response:
-        retweeted_by = post.get('retweeted_by')
+        retweeted_by = post.get('retweeted_by', [])
 
         post['liked'] = True if post.get('_id') in liked_posts else False
         post['saved'] = True if post.get('_id') in user_bookmarks else False
