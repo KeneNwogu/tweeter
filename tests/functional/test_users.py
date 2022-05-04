@@ -30,3 +30,9 @@ def test_user_bookmarks(client, headers, mock_post):
     assert response.status_code == 200
     assert type(data) == dict
     assert type(data['bookmarks']) == dict
+
+
+def test_user_retweet(client, headers, mock_post):
+    url = f'/{mock_post}/retweet'
+    response = client.get(url, headers=headers)
+    assert response.status_code == 200
