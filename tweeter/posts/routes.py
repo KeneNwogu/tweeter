@@ -66,3 +66,41 @@ def bookmark_post(post_id):
             'message': 'success',
             'info': 'This post is already bookmarked'
         }
+
+
+@posts.route('/<post_id>/retweet')
+@login_required
+def retweet_post(post_id):
+    post_id = validate_id(post_id)
+    post = mongo.db.posts.find_one({'_id': post_id})
+    if post:
+        user = get_current_user()
+        retweeted_by = post.get('retweeted_by', [])
+        if user not in retweeted_by:
+            mongo.db.posts.update_one({'_id': ObjectId(post_id)}, {
+                "$inc": {
+                    "retweets": 1
+                },
+                '$addToSet': {
+                    'retweeted_by': user
+                }
+            })
+            return {
+                'message': 'success',
+                'retweeted': True
+            }
+        else:
+            mongo.db.posts.update_one({'_id': ObjectId(post_id)}, {
+                "$inc": {
+                    "retweets": -1
+                },
+                '$pull': {
+                    'retweeted_by': user
+                }
+            })
+            return {
+                'message': 'success',
+                'retweeted': False
+            }
+    else:
+        return resource_not_found('Cannot retrieve details of this post')

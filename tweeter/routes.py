@@ -76,8 +76,10 @@ def create_post():
 @login_required
 def post_feed():
     current_user_id = get_current_user().get('_id')
+    user_bookmarks = mongo.db.users.find_one({'_id': current_user_id}).get('bookmarks')
     following = list(mongo.db.followers.find({'follower': current_user_id}))
     following_ids = list(map(lambda x: x.get('user'), following))
+
     user_likes = list(mongo.db.likes.find({'user': current_user_id}))
     liked_posts = list(map(lambda x: x.get('post'), user_likes))
     pipeline = [
@@ -112,14 +114,17 @@ def post_feed():
             'comments': 1,
             'retweets': 1,
             'likes': 1,
+            'retweeted_by': 1,
             'createdAt': 1
         }}
     ]
     response = list(mongo.db.posts.aggregate(pipeline))
     for post in response:
-        if post.get('_id') in liked_posts:
-            post['liked'] = True
-        else:
-            post['liked'] = False
+        retweeted_by = post.get('retweeted_by')
+
+        post['liked'] = True if post.get('_id') in liked_posts else False
+        post['saved'] = True if post.get('_id') in user_bookmarks else False
+        post['retweeted'] = True if current_user_id in retweeted_by else False
+
     feed = json_util.dumps(response)
     return feed

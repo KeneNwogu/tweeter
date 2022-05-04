@@ -142,10 +142,16 @@ def follow_user(user_id):
         if not mongo.db.users.find_one({'_id': ObjectId(user_id)}):
             return resource_not_found('user does not exist')
         else:
+            mongo.db.users.update_one({'_id': ObjectId(user_id)}, {
+                "$inc": {
+                    "followers": -1
+                }
+            })
+            mongo.db.followers.delete_one({'user': ObjectId(user_id), 'follower': user})
             return {
-                "message": "you are already following this user",
+                "message": "unfollowed",
                 "followers": len(list(mongo.db.followers.find({'user': ObjectId(user_id)}))),
-                "following": True
+                "following": False
             }
 
 
@@ -236,3 +242,47 @@ def user_bookmarks():
         b['user'] = mongo.db.users.find_one({'_id': b['user']})
 
     return json_util.dumps(bookmarks)
+
+
+@users.route('/user_id/posts')
+@login_required
+def user_posts(user_id):
+    user_id = validate_id(user_id)
+    current_user_id = get_current_user().get('_id')
+    user_likes = list(mongo.db.likes.find({'user': current_user_id}))
+    liked_posts = list(map(lambda x: x.get('post'), user_likes))
+    pipeline = [
+        {
+            "$match": {
+                "user": ObjectId(user_id)
+            },
+        },
+        {
+            "$lookup": {
+                "from": "users",
+                "localField": "user",
+                "foreignField": "_id",
+                "as": "user"
+            }
+        },
+        {"$unwind": "$user"},
+        {"$project": {
+            "caption": 1,
+            "post_urls": 1,
+            "user": 1,
+            "restricted": 1,
+            'comments': 1,
+            'retweets': 1,
+            'likes': 1,
+            'createdAt': 1
+        }}
+    ]
+    response = list(mongo.db.posts.aggregate(pipeline))
+    for post in response:
+        if post.get('_id') in liked_posts:
+            post['liked'] = True
+        else:
+            post['liked'] = False
+
+    posts = json_util.dumps(response)
+    return posts
