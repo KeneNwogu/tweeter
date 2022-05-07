@@ -59,12 +59,23 @@ def bookmark_post(post_id):
             }
         })
         return {
-            'message': 'success'
+            'message': 'success',
+            'bookmarked': True
         }
     else:
+        mongo.db.posts.update_one({'_id': ObjectId(post_id)}, {
+            "$inc": {
+                "bookmarks": -1
+            }
+        })
+        mongo.db.users.update_one({'_id': user.get('_id')}, {
+            '$pull': {
+                'bookmarks': ObjectId(post_id)
+            }
+        })
         return {
             'message': 'success',
-            'info': 'This post is already bookmarked'
+            'bookmarked': False
         }
 
 
