@@ -67,9 +67,12 @@ def create_post():
                                           'createdAt': datetime.datetime.utcnow()
                                           })
         # TODO create socket and broadcast to user's followers
-        return {
-            "message": "created post"
+        data = {
+            "message": "created post",
+            "post_id": str(post.inserted_id),
+            "user": user
         }
+        return json_util.dumps(data)
 
 
 @app.route('/feed')

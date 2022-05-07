@@ -12,36 +12,49 @@ comments = Blueprint('comments', __name__)
 @comments.route('/<post_id>/comments', methods=['GET', 'POST'])
 @login_required
 def comment(post_id):
+    pipeline = [
+        {
+            "$match": {"post": ObjectId(post_id)}
+        },
+        {
+            "$lookup": {
+                "from": "users",
+                "localField": "user",
+                "foreignField": "_id",
+                "as": "user"
+            }
+        },
+        {"$unwind": "$user"}
+    ]
+    post_pipeline = [
+        {
+            "$match": {"_id": ObjectId(post_id)}
+        },
+        {
+            "$lookup": {
+                "from": "users",
+                "localField": "user",
+                "foreignField": "_id",
+                "as": "user"
+            }
+        },
+        {"$unwind": "$user"}
+    ]
     if request.method == 'GET':
-        pipeline = [
-            {
-                "$match": {"post": ObjectId(post_id)}
-            },
-            {
-                "$lookup": {
-                    "from": "users",
-                    "localField": "user",
-                    "foreignField": "_id",
-                    "as": "user"
-                }
-            },
-            {"$unwind": "$user"}
-        ]
-        post_pipeline = [
-            {
-                "$match": {"_id": ObjectId(post_id)}
-            },
-            {
-                "$lookup": {
-                    "from": "users",
-                    "localField": "user",
-                    "foreignField": "_id",
-                    "as": "user"
-                }
-            },
-            {"$unwind": "$user"}
-        ]
+        current_user = get_current_user()
+        current_user_id = current_user.get('_id')
+        user_bookmarks = current_user.get('bookmarks')
+        user_likes = list(mongo.db.likes.find({'user': current_user_id}))
+        liked_posts = list(map(lambda x: x.get('post'), user_likes))
+
         post = list(mongo.db.posts.aggregate(post_pipeline))[0]
+
+        retweeted_by = list(map(lambda x: x.get('_id'), post.get('retweeted_by', [])))  # user ids
+
+        post['liked'] = True if post.get('_id') in liked_posts else False
+        post['saved'] = True if post.get('_id') in user_bookmarks else False
+        post['retweeted'] = True if current_user_id in retweeted_by else False
+
         comments_response = mongo.db.comments.aggregate(pipeline)
         response = {
             "post": post,
@@ -72,9 +85,10 @@ def comment(post_id):
                 'createdAt': datetime.utcnow()
             }
             mongo.db.comments.insert_one(data)
+            comments_response = mongo.db.comments.aggregate(pipeline)
             return json_util.dumps({
                 "message": "successfully commented",
-                'comment': data
+                'comments': comments_response
             })
         else:
             # 404 message
