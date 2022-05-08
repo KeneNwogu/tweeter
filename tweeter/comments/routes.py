@@ -4,7 +4,7 @@ from bson import json_util, ObjectId
 from tweeter import mongo
 from tweeter.api.auth import login_required, get_current_user
 from tweeter.api.errors import resource_not_found
-from tweeter.utitlities import upload_files
+from tweeter.utitlities import upload_files, validate_id
 
 comments = Blueprint('comments', __name__)
 
@@ -43,7 +43,7 @@ def comment(post_id):
     if request.method == 'GET':
         current_user = get_current_user()
         current_user_id = current_user.get('_id')
-        user_bookmarks = current_user.get('bookmarks')
+        user_bookmarks = current_user.get('bookmarks', [])
         user_likes = list(mongo.db.likes.find({'user': current_user_id}))
         liked_posts = list(map(lambda x: x.get('post'), user_likes))
 
@@ -93,3 +93,36 @@ def comment(post_id):
         else:
             # 404 message
             return resource_not_found('Post has been deleted or not found')
+
+
+@comments.route('/comment/<comment_id>/like', methods=['GET'])
+@login_required
+def like_comment(comment_id):
+    user_id = get_current_user().get('_id')
+    comment_id = validate_id(comment_id)
+    if not mongo.db.comments.find_one({'_id': comment_id}):
+        return resource_not_found('This comment is unavailable')
+    if not mongo.db.likes.find_one({'comment': comment_id, 'user': user_id, 'is_comment': True}):
+        mongo.db.comments.update_one({'_id': ObjectId(comment_id)}, {
+            "$inc": {
+                "likes": 1
+            }
+        })
+        mongo.db.likes.insert_one({'comment': ObjectId(comment_id), 'user': user_id, 'is_comment': True})
+        return {
+            'message': 'success',
+            'liked': True,
+            'likes': mongo.db.comments.find_one({'_id': comment_id}).get('likes')
+        }
+    else:
+        mongo.db.comments.update_one({'_id': comment_id}, {
+            "$inc": {
+                "likes": -1
+            }
+        })
+        mongo.db.likes.delete_one({'comment': ObjectId(comment_id), 'user': user_id})
+        return {
+            'message': 'success',
+            'liked': False,
+            'likes': mongo.db.comments.find_one({'_id': ObjectId(comment_id)}).get('likes')
+        }

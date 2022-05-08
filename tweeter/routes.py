@@ -79,11 +79,11 @@ def create_post():
 @login_required
 def post_feed():
     current_user_id = get_current_user().get('_id')
-    user_bookmarks = mongo.db.users.find_one({'_id': current_user_id}).get('bookmarks')
+    user_bookmarks = mongo.db.users.find_one({'_id': current_user_id}).get('bookmarks', [])
     following = list(mongo.db.followers.find({'follower': current_user_id}))
     following_ids = list(map(lambda x: x.get('user'), following))
 
-    user_likes = list(mongo.db.likes.find({'user': current_user_id}))
+    user_likes = list(mongo.db.likes.find({'user': current_user_id, 'post': {"$ne": None}}))
     liked_posts = list(map(lambda x: x.get('post'), user_likes))
     pipeline = [
         {

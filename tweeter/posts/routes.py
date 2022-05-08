@@ -21,7 +21,7 @@ def like_post(post_id):
                 "likes": 1
             }
         })
-        mongo.db.likes.insert_one({'post': ObjectId(post_id), 'user': user.get('_id')})
+        mongo.db.likes.insert_one({'post': ObjectId(post_id), 'user': user.get('_id'), 'is_comment': False})
         return {
             'message': 'success',
             'liked': True,
