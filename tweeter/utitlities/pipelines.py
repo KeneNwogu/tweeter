@@ -14,6 +14,12 @@ def post_aggregation_pipeline(post_id):
                 "as": "user"
             }
         },
-        {"$unwind": "$user"}
+        {"$unwind": "$user"},
+        {"$project": {
+            "password_hash": 0,
+            "bookmarks": 0,
+            "following": 0,
+            "followers": 0
+        }}
     ]
     return post_pipeline

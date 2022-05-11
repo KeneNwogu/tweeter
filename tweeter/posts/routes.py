@@ -7,6 +7,7 @@ from tweeter import mongo
 from tweeter.api.auth import login_required, get_current_user
 from tweeter.api.errors import resource_not_found
 from tweeter.utitlities import upload_files, validate_id
+from tweeter.utitlities.pipelines import post_aggregation_pipeline
 
 posts = Blueprint('posts', __name__)
 
@@ -115,3 +116,11 @@ def retweet_post(post_id):
             }
     else:
         return resource_not_found('Cannot retrieve details of this post')
+
+
+@posts.route('/post/<post_id>/likes')
+def post_likes(post_id):
+    post_id = validate_id(post_id)
+    pipeline = post_aggregation_pipeline(post_id)
+    response = list(mongo.db.likes.aggregate(pipeline))
+    return json_util.dumps(response)
