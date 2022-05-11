@@ -101,15 +101,6 @@ def post_feed():
         },
         {"$unwind": "$user"},
         {"$project": {
-            # "liked": {
-            #     "$cond": {
-            #         "if": {
-            #             "$in": ["$_id", liked_posts]
-            #         },
-            #         "then": True,
-            #         "else": False
-            #     }
-            # },
             "caption": 1,
             "post_urls": 1,
             "user": 1,
