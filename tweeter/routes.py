@@ -88,7 +88,7 @@ def post_feed():
     pipeline = [
         {
             "$match": {
-                "$or": [{"fake": True}, {"user": {"$in": following_ids}}]
+                "$or": [{"fake": True}, {"user": {"$in": following_ids}}, {"user": current_user_id}]
             },
         },
         {

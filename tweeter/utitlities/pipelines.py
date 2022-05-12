@@ -1,10 +1,10 @@
 from bson import ObjectId
 
 
-def post_aggregation_pipeline(post_id):
+def post_likes_aggregation_pipeline(post_id):
     post_pipeline = [
         {
-            "$match": {"_id": ObjectId(post_id)}
+            "$match": {"post": ObjectId(post_id)}
         },
         {
             "$lookup": {
