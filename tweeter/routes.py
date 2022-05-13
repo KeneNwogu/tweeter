@@ -57,7 +57,10 @@ def create_post():
     restricted = form.get('restricted', False)
 
     # a file or caption must be provided
-    if not (caption or files) or (caption == '' and files == []):
+    # if not (caption or files) or (caption == '' and files == []):
+    #     return bad_request("must provide a caption or image")
+
+    if not caption and not files:
         return bad_request("must provide a caption or image")
 
     else:
