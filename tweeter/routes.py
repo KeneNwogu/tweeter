@@ -114,7 +114,8 @@ def post_feed():
             'saves': 1,
             'retweeted_by': 1,
             'createdAt': 1
-        }}
+        }},
+        {"$sort": {"createdAt": -1}}
     ]
     response = list(mongo.db.posts.aggregate(pipeline))
     for post in response:

@@ -232,7 +232,8 @@ def user_bookmarks():
                 "foreignField": "_id",
                 "as": "bookmarks"
             }
-        }
+        },
+        {"$sort": {"createdAt": -1}}
     ]
     bookmarks = list(mongo.db.users.aggregate(pipeline))
     bookmarks = bookmarks[0] if len(bookmarks) > 0 else {'bookmarks': []}
@@ -275,7 +276,8 @@ def user_posts(user_id):
             'retweets': 1,
             'likes': 1,
             'createdAt': 1
-        }}
+        }},
+        {"$sort": {"createdAt": -1}}
     ]
     response = list(mongo.db.posts.aggregate(pipeline))
     for post in response:
