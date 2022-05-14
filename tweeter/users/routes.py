@@ -243,7 +243,7 @@ def user_bookmarks():
     return json_util.dumps(bookmarks)
 
 
-@users.route('/<user_id>/posts')
+@users.route('/user/<user_id>/posts')
 @login_required
 def user_posts(user_id):
     user_id = validate_id(user_id)
@@ -288,3 +288,59 @@ def user_posts(user_id):
 
     posts = json_util.dumps(response)
     return posts
+
+
+@users.route('/user/<user_id>/likes')
+@login_required
+def user_likes(user_id):
+    user_id = validate_id(user_id)
+
+    current_user = get_current_user()
+    current_user_id = current_user.get('_id')
+    current_user_bookmarks = current_user.get('bookmarks')
+
+    user_likes = list(mongo.db.likes.find({'user': current_user_id}))
+    liked_posts = list(map(lambda x: x.get('post'), user_likes))
+
+    pipeline = [
+        {
+            "$match": {
+                "user": ObjectId(user_id)
+            },
+        },
+        {
+            "$lookup": {
+                "from": "posts",
+                "localField": "post",
+                "foreignField": "_id",
+                "as": "post"
+            }
+        },
+        {"$unwind": "$post"},
+        {
+            "$lookup": {
+                "from": "users",
+                "localField": "user",
+                "foreignField": "_id",
+                "as": "user"
+            }
+        },
+
+        {"$unwind": "$user"},
+
+        {"$project": {
+            "password_hash": 0,
+            "bookmarks": 0,
+            "following": 0,
+            "followers": 0
+        }}
+    ]
+
+    likes = list(mongo.db.likes.aggregate(pipeline))
+    for post in likes:
+        retweeted_by = list(map(lambda x: x.get('_id'), post.get('retweeted_by', [])))  # user ids
+        post['liked'] = True if post.get('_id') in liked_posts else False
+        post['saved'] = True if post.get('_id') in current_user_bookmarks else False
+        post['retweeted'] = True if current_user_id in retweeted_by else False
+
+    return json_util.dumps(likes)

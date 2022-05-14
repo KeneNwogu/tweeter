@@ -29,10 +29,24 @@ def test_user_bookmarks(client, headers, mock_post):
     data = json_util.loads(response.data)
     assert response.status_code == 200
     assert type(data) == dict
-    assert type(data['bookmarks']) == dict
+    assert type(data['bookmarks']) == list
 
 
 def test_user_retweet(client, headers, mock_post):
     url = f'/{mock_post}/retweet'
+    response = client.get(url, headers=headers)
+    assert response.status_code == 200
+
+
+def test_user_posts(client, headers):
+    user_id = headers.get('user_id')
+    url = f'/user/{user_id}/posts'
+    response = client.get(url, headers=headers)
+    assert response.status_code == 200
+
+
+def test_user_likes(client, headers):
+    user_id = headers.get('user_id')
+    url = f'/user/{user_id}/likes'
     response = client.get(url, headers=headers)
     assert response.status_code == 200
