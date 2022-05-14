@@ -67,7 +67,7 @@ def upload_files(files):
 def validate_id(_id):
     try:
         _id = ObjectId(_id)
-    except bson.errors.InvalidId:
+    except (bson.errors.InvalidId, TypeError):
         return bad_request(f"Invalid userID of {_id} was passed in the url")
     else:
         return _id

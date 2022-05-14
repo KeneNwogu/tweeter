@@ -51,7 +51,7 @@ def bookmark_post(post_id):
     if post_id not in mongo.db.users.find_one({'_id': user.get('_id')}).get('bookmarks', []):
         mongo.db.posts.update_one({'_id': ObjectId(post_id)}, {
             "$inc": {
-                "bookmarks": 1
+                "saves": 1
             }
         })
         mongo.db.users.update_one({'_id': user.get('_id')}, {
@@ -66,7 +66,7 @@ def bookmark_post(post_id):
     else:
         mongo.db.posts.update_one({'_id': ObjectId(post_id)}, {
             "$inc": {
-                "bookmarks": -1
+                "saves": -1
             }
         })
         mongo.db.users.update_one({'_id': user.get('_id')}, {

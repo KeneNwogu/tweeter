@@ -67,7 +67,7 @@ def create_post():
         post_urls = upload_files(files)
         post = mongo.db.posts.insert_one({"caption": caption, "post_urls": post_urls, "user": user.get('_id'),
                                           "restricted": restricted, 'comments': 0, 'retweets': 0, 'likes': 0,
-                                          'createdAt': datetime.datetime.utcnow()
+                                          'saves': 0, 'createdAt': datetime.datetime.utcnow()
                                           })
         # TODO create socket and broadcast to user's followers
         data = {
