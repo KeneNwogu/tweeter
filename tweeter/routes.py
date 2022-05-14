@@ -111,6 +111,7 @@ def post_feed():
             'comments': 1,
             'retweets': 1,
             'likes': 1,
+            'saves': 1,
             'retweeted_by': 1,
             'createdAt': 1
         }}

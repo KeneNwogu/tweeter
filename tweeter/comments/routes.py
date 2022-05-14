@@ -81,6 +81,7 @@ def comment(post_id):
                 'comments': 0,
                 'retweets': 0,
                 'likes': 0,
+                'saves': 0,
                 'user': user.get('_id'),
                 'createdAt': datetime.utcnow()
             }
