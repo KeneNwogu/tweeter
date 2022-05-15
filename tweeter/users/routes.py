@@ -401,7 +401,7 @@ def user_media(user_id):
         {"$sort": {"createdAt": -1}}
     ]
 
-    response = mongo.db.posts.aggregate(pipeline)
+    response = list(mongo.db.posts.aggregate(pipeline))
     for post in response:
         retweeted_by = list(map(lambda x: x.get('_id'), post.get('retweeted_by', [])))  # user ids
         post['liked'] = True if post.get('_id') in liked_posts else False
