@@ -382,16 +382,6 @@ def user_media(user_id):
         },
         {
             "$lookup": {
-                "from": "posts",
-                "localField": "post",
-                "foreignField": "_id",
-                "as": "post"
-            }
-        },
-        {"$unwind": "$post"},
-
-        {
-            "$lookup": {
                 "from": "users",
                 "localField": "user",
                 "foreignField": "_id",
