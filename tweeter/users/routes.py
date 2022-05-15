@@ -320,6 +320,15 @@ def user_likes(user_id):
         {
             "$lookup": {
                 "from": "users",
+                "localField": "post.user",
+                "foreignField": "_id",
+                "as": "post.user"
+            }
+        },
+        {"$unwind": "$post.user"},
+        {
+            "$lookup": {
+                "from": "users",
                 "localField": "user",
                 "foreignField": "_id",
                 "as": "user"
@@ -329,10 +338,16 @@ def user_likes(user_id):
         {"$unwind": "$user"},
 
         {"$project": {
-            "password_hash": 0,
-            "bookmarks": 0,
-            "following": 0,
-            "followers": 0
+            "user.password_hash": 0,
+            "user.bookmarks": 0,
+            "user.bio": 0,
+            "user.following": 0,
+            "user.followers": 0,
+            "post.user.password_hash": 0,
+            "post.user.bookmarks": 0,
+            "post.user.bio": 0,
+            "post.user.following": 0,
+            "post.user.followers": 0,
         }}
     ]
 
