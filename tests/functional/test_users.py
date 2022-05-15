@@ -50,3 +50,10 @@ def test_user_likes(client, headers):
     url = f'/user/{user_id}/likes'
     response = client.get(url, headers=headers)
     assert response.status_code == 200
+
+
+def test_user_media(client, headers):
+    user_id = headers.get('user_id')
+    url = f'/user/{user_id}/media'
+    response = client.get(url, headers=headers)
+    assert response.status_code == 200
