@@ -377,10 +377,7 @@ def user_media(user_id):
     pipeline = [
         {
             "$match": {
-                "user": ObjectId(user_id),
-                "post_urls": {
-                    "$ne": []
-                }
+                "$and": [{"user": ObjectId(user_id)}, {"post_urls": {"$ne": []}}]
             },
         },
         {
