@@ -40,13 +40,14 @@ def comment(post_id):
         },
         {"$unwind": "$user"}
     ]
-    if request.method == 'GET':
-        current_user = get_current_user()
-        current_user_id = current_user.get('_id')
-        user_bookmarks = current_user.get('bookmarks', [])
-        user_likes = list(mongo.db.likes.find({'user': current_user_id}))
-        liked_posts = list(map(lambda x: x.get('post'), user_likes))
 
+    current_user = get_current_user()
+    current_user_id = current_user.get('_id')
+    user_bookmarks = current_user.get('bookmarks', [])
+    user_likes = list(mongo.db.likes.find({'user': current_user_id}))
+    liked_posts = list(map(lambda x: x.get('post'), user_likes))
+
+    if request.method == 'GET':
         post = list(mongo.db.posts.aggregate(post_pipeline))[0]
 
         retweeted_by = post.get('retweeted_by', [])  # user ids
@@ -55,7 +56,10 @@ def comment(post_id):
         post['saved'] = True if post.get('_id') in user_bookmarks else False
         post['retweeted'] = True if current_user_id in retweeted_by else False
 
-        comments_response = mongo.db.comments.aggregate(pipeline)
+        comments_response = list(mongo.db.comments.aggregate(pipeline))
+        for comment_obj in comments_response:
+            if comment_obj.get('_id') in liked_posts:
+                comment_obj['liked'] = True
         response = {
             "post": post,
             "comments": comments_response
@@ -86,7 +90,10 @@ def comment(post_id):
                 'createdAt': datetime.utcnow()
             }
             mongo.db.comments.insert_one(data)
-            comments_response = mongo.db.comments.aggregate(pipeline)
+            comments_response = list(mongo.db.comments.aggregate(pipeline))
+            for comment_obj in comments_response:
+                if comment_obj.get('_id') in liked_posts:
+                    comment_obj['liked'] = True
             return json_util.dumps({
                 "message": "successfully commented",
                 'comments': comments_response
