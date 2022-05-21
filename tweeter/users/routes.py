@@ -353,7 +353,8 @@ def user_likes(user_id):
     ]
 
     likes = list(mongo.db.likes.aggregate(pipeline))
-    for post in likes:
+    for like in likes:
+        post = like.get('post')
         retweeted_by = list(map(lambda x: x.get('_id'), post.get('retweeted_by', [])))  # user ids
         post['liked'] = True if post.get('_id') in liked_posts else False
         post['saved'] = True if post.get('_id') in current_user_bookmarks else False

@@ -1,7 +1,7 @@
 import datetime
 
 import jwt
-from bson import json_util
+from bson import json_util, ObjectId
 from flask import request, make_response
 from flask_cors import cross_origin
 from werkzeug.security import check_password_hash
@@ -127,3 +127,65 @@ def post_feed():
 
     feed = json_util.dumps(response)
     return feed
+
+
+@app.route('/search/<keyword>')
+def search(keyword):
+    pipeline = [
+        {
+            "$match": {
+                "caption": {"$regex": keyword, "$options": "i"}
+            },
+        },
+        {
+            "$lookup": {
+                "from": "users",
+                "localField": "user",
+                "foreignField": "_id",
+                "as": "user"
+            }
+        },
+        {"$unwind": "$user"},
+        {"$project": {
+            "user.password_hash": 0,
+            "user.bookmarks": 0,
+            "user.following": 0,
+            "user.followers": 0,
+            "user.bio": 0
+        }},
+        {"$sort": {"createdAt": -1}}
+    ]
+    posts = list(mongo.db.posts.aggregate(pipeline))
+    current_user_id = get_current_user().get('_id')
+    user_bookmarks = mongo.db.users.find_one({'_id': current_user_id}).get('bookmarks', [])
+    user_likes = list(mongo.db.likes.find({'user': current_user_id, 'post': {"$ne": None}}))
+    liked_posts = list(map(lambda x: x.get('post'), user_likes))
+
+    for post in posts:
+        retweeted_by = list(map(lambda x: x.get('_id'), post.get('retweeted_by', [])))  # user ids
+
+        post['liked'] = True if post.get('_id') in liked_posts else False
+        post['saved'] = True if post.get('_id') in user_bookmarks else False
+        post['retweeted'] = True if current_user_id in retweeted_by else False
+
+    users = list(mongo.db.users.find({"username": {"$regex": keyword, "$options": "i"}}))
+    for user in users:
+        if str(current_user_id) == str(user.get('_id')):
+            user['self'] = True
+            user['follows_you'] = False
+            user['you_follow'] = False
+        else:
+            user['self'] = False
+            user['you_follow'] = True if mongo.db.followers.find_one({
+                'user': ObjectId(user.get('_id')),
+                'follower': ObjectId(current_user_id)
+            }) else False
+            user['follows_you'] = True if mongo.db.followers.find_one({
+                'user': ObjectId(current_user_id),
+                'follower': ObjectId(user.get('_id'))
+            }) else False
+    response_data = {
+        'posts': posts,
+        'users': users
+    }
+    return json_util.dumps(response_data)
