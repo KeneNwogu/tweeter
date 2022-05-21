@@ -173,7 +173,7 @@ def unfollow_user(user_id):
         }
 
 
-@users.route('/<user_id>/followers')
+@users.route('/user/<user_id>/followers')
 def user_followers(user_id):
     # return users following the user_id
     pipeline = [
@@ -188,13 +188,19 @@ def user_followers(user_id):
                 "as": "user"
             }
         },
+        {"$project": {
+            "user.password_hash": 0,
+            "user.bookmarks": 0,
+            "user.following": 0,
+            "user.followers": 0,
+        }},
         {"$unwind": "$user"}
     ]
-    followers = mongo.db.followers.aggregate(pipeline)
+    followers = list(mongo.db.followers.aggregate(pipeline))
     return json_util.dumps(followers)
 
 
-@users.route('/<user_id>/following')
+@users.route('/user/<user_id>/following')
 def user_following(user_id):
     # return users following the user_id
     pipeline = [
@@ -209,9 +215,15 @@ def user_following(user_id):
                 "as": "user"
             }
         },
+        {"$project": {
+            "user.password_hash": 0,
+            "user.bookmarks": 0,
+            "user.following": 0,
+            "user.followers": 0,
+        }},
         {"$unwind": "$user"}
     ]
-    following = mongo.db.followers.aggregate(pipeline)
+    following = list(mongo.db.followers.aggregate(pipeline))
     return json_util.dumps(following)
 
 

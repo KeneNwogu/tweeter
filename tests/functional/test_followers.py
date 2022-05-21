@@ -21,7 +21,7 @@ user2 = mongo.db.users.find_one({
 
 def test_followers_list(client, headers):
     _id = str(user1.inserted_id)
-    url = f'/{_id}/followers'
+    url = f'/user/{_id}/followers'
     response = client.get(url, headers=headers)
     data = json_util.loads(response.data)
 
@@ -31,7 +31,7 @@ def test_followers_list(client, headers):
 
 def test_following_list(client, headers):
     _id = str(user1.inserted_id)
-    url = f'/{_id}/following'
+    url = f'/user/{_id}/following'
     response = client.get(url, headers=headers)
     data = json_util.loads(response.data)
 
