@@ -119,7 +119,7 @@ def post_feed():
     ]
     response = list(mongo.db.posts.aggregate(pipeline))
     for post in response:
-        retweeted_by = list(map(lambda x: x.get('_id'), post.get('retweeted_by', [])))  # user ids
+        retweeted_by = post.get('retweeted_by', [])  # user ids
 
         post['liked'] = True if post.get('_id') in liked_posts else False
         post['saved'] = True if post.get('_id') in user_bookmarks else False
@@ -163,7 +163,7 @@ def search(keyword):
     liked_posts = list(map(lambda x: x.get('post'), user_likes))
 
     for post in posts:
-        retweeted_by = list(map(lambda x: x.get('_id'), post.get('retweeted_by', [])))  # user ids
+        retweeted_by = post.get('retweeted_by', [])  # user ids
 
         post['liked'] = True if post.get('_id') in liked_posts else False
         post['saved'] = True if post.get('_id') in user_bookmarks else False
