@@ -130,6 +130,7 @@ def post_feed():
 
 
 @app.route('/search/<keyword>')
+@login_required
 def search(keyword):
     pipeline = [
         {

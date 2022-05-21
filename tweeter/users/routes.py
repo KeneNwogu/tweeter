@@ -410,3 +410,50 @@ def user_media(user_id):
         post['retweeted'] = True if current_user_id in retweeted_by else False
 
     return json_util.dumps(response)
+
+
+@users.route('/user/<user_id>/retweets')
+@login_required
+def user_retweets(user_id):
+    current_user = get_current_user()
+    current_user_id = current_user.get('_id')
+    current_user_bookmarks = current_user.get('bookmarks')
+
+    user_likes = list(mongo.db.likes.find({'user': current_user_id}))
+    liked_posts = list(map(lambda x: x.get('post'), user_likes))
+
+    pipeline = [
+        {
+            "$match": {
+                "retweeted_by": ObjectId(user_id)
+            },
+        },
+        {
+            "$lookup": {
+                "from": "users",
+                "localField": "user",
+                "foreignField": "_id",
+                "as": "user"
+            }
+        },
+
+        {"$unwind": "$user"},
+
+        {"$project": {
+            "user.password_hash": 0,
+            "user.bookmarks": 0,
+            "user.bio": 0,
+            "user.following": 0,
+            "user.followers": 0,
+        }},
+        {"$sort": {"createdAt": -1}}
+    ]
+
+    response = list(mongo.db.posts.aggregate(pipeline))
+    for post in response:
+        retweeted_by = list(map(lambda x: x.get('_id'), post.get('retweeted_by', [])))  # user ids
+        post['liked'] = True if post.get('_id') in liked_posts else False
+        post['saved'] = True if post.get('_id') in current_user_bookmarks else False
+        post['retweeted'] = True if current_user_id in retweeted_by else False
+
+    return json_util.dumps(response)
