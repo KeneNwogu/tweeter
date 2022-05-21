@@ -86,15 +86,15 @@ def retweet_post(post_id):
     post_id = validate_id(post_id)
     post = mongo.db.posts.find_one({'_id': post_id})
     if post:
-        user = get_current_user()
+        user_id = get_current_user().get('_id')
         retweeted_by = post.get('retweeted_by', [])
-        if user not in retweeted_by:
+        if user_id not in retweeted_by:
             mongo.db.posts.update_one({'_id': ObjectId(post_id)}, {
                 "$inc": {
                     "retweets": 1
                 },
                 '$addToSet': {
-                    'retweeted_by': user
+                    'retweeted_by': user_id
                 }
             })
             return {
@@ -107,7 +107,7 @@ def retweet_post(post_id):
                     "retweets": -1
                 },
                 '$pull': {
-                    'retweeted_by': user
+                    'retweeted_by': user_id
                 }
             })
             return {
