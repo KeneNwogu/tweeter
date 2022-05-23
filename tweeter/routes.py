@@ -194,5 +194,23 @@ def search(keyword):
 
 @app.route('/users/suggestions')
 def user_suggestions():
-    recent_users = list(mongo.db.users.find({}, {'password_hash': 0}).sort('createdAt', -1))
+    recent_users = list(mongo.db.users.find({}, {'password_hash': 0, 'bookmarks': 0}).sort('createdAt', -1))
+    current_user = get_current_user()
+    if current_user:
+        current_user_id = current_user.get('_id')
+        for user in recent_users:
+            if str(current_user_id) == str(user.get('_id')):
+                user['self'] = True
+                user['follows_you'] = False
+                user['you_follow'] = False
+            else:
+                user['self'] = False
+                user['you_follow'] = True if mongo.db.followers.find_one({
+                    'user': ObjectId(user.get('_id')),
+                    'follower': ObjectId(current_user_id)
+                }) else False
+                user['follows_you'] = True if mongo.db.followers.find_one({
+                    'user': ObjectId(current_user_id),
+                    'follower': ObjectId(user.get('_id'))
+                }) else False
     return json_util.dumps(recent_users)
