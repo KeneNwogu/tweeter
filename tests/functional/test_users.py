@@ -57,3 +57,9 @@ def test_user_media(client, headers):
     url = f'/user/{user_id}/media'
     response = client.get(url, headers=headers)
     assert response.status_code == 200
+
+
+def test_user_suggestions(client):
+    url = f'/users/suggestions'
+    response = client.get(url)
+    assert response.status_code == 200

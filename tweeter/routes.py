@@ -190,3 +190,9 @@ def search(keyword):
         'users': users
     }
     return json_util.dumps(response_data)
+
+
+@app.route('/users/suggestions')
+def user_suggestions():
+    recent_users = list(mongo.db.users.find({}, {'password_hash': 0}).sort('createdAt', -1))
+    return json_util.dumps(recent_users)

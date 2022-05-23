@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from bson import json_util, ObjectId
 from cloudinary.uploader import upload
 from flask import Blueprint, request
@@ -35,7 +37,8 @@ def register():
             "profile_image": profile_image,
             "bio": "Hey there! I'm using Tweeter",
             "followers": 0,
-            "following": 0
+            "following": 0,
+            "createdAt": datetime.utcnow()
         }
         user = mongo.db.users.insert_one(user_data)
 

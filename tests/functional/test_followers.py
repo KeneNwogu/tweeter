@@ -11,7 +11,8 @@ user1 = mongo.db.users.insert_one({
     "profile_image": 'fake_profile_image_url',
     "bio": "Hey there! I'm using Tweeter",
     "followers": 0,
-    "following": 0
+    "following": 0,
+    'createdAt': datetime.datetime.utcnow()
 })
 
 user2 = mongo.db.users.find_one({
