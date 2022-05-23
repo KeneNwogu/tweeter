@@ -194,7 +194,7 @@ def search(keyword):
 
 @app.route('/users/suggestions')
 def user_suggestions():
-    recent_users = list(mongo.db.users.find({}, {'password_hash': 0, 'bookmarks': 0}).sort('createdAt', -1))
+    recent_users = list(mongo.db.users.find({}, {'password_hash': 0, 'bookmarks': 0}).limit(5).sort('createdAt', -1))
     current_user = get_current_user()
     if current_user:
         current_user_id = current_user.get('_id')
