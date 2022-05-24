@@ -24,7 +24,8 @@ def comment(post_id):
                 "as": "user"
             }
         },
-        {"$unwind": "$user"}
+        {"$unwind": "$user"},
+        {"$sort": {"createdAt": -1}}
     ]
     post_pipeline = [
         {

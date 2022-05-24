@@ -233,8 +233,10 @@ def user_following(user_id):
 @users.route('/bookmarks')
 @login_required
 def user_bookmarks():
-    current_user_id = get_current_user().get('_id')
-    print('user', mongo.db.users.find_one({'_id': current_user_id}))
+    current_user = get_current_user()
+    current_user_id = current_user.get('_id')
+    user_likes = list(mongo.db.likes.find({'user': current_user_id}))
+    liked_posts = list(map(lambda x: x.get('post'), user_likes))
     # aggregation
     pipeline = [
         {
@@ -254,6 +256,10 @@ def user_bookmarks():
     bookmarks = bookmarks[0] if len(bookmarks) > 0 else {'bookmarks': []}
     for b in bookmarks['bookmarks']:
         b['user'] = mongo.db.users.find_one({'_id': b['user']})
+        retweeted_by = b.get('retweeted_by', [])  # user ids
+        b['liked'] = True if b.get('_id') in liked_posts else False
+        b['saved'] = True
+        b['retweeted'] = True if current_user_id in retweeted_by else False
 
     return json_util.dumps(bookmarks)
 

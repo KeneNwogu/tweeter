@@ -83,17 +83,17 @@ def create_post():
 def post_feed():
     current_user_id = get_current_user().get('_id')
     user_bookmarks = mongo.db.users.find_one({'_id': current_user_id}).get('bookmarks', [])
-    following = list(mongo.db.followers.find({'follower': current_user_id}))
-    following_ids = list(map(lambda x: x.get('user'), following))
+    # following = list(mongo.db.followers.find({'follower': current_user_id}))
+    # following_ids = list(map(lambda x: x.get('user'), following))
 
     user_likes = list(mongo.db.likes.find({'user': current_user_id, 'post': {"$ne": None}}))
     liked_posts = list(map(lambda x: x.get('post'), user_likes))
     pipeline = [
-        {
-            "$match": {
-                "$or": [{"fake": True}, {"user": {"$in": following_ids}}, {"user": current_user_id}]
-            },
-        },
+        # {
+        #     "$match": {
+        #         "$or": [{"fake": True}, {"user": {"$in": following_ids}}, {"user": current_user_id}]
+        #     },
+        # },
         {
             "$lookup": {
                 "from": "users",
@@ -194,7 +194,8 @@ def search(keyword):
 
 @app.route('/users/suggestions')
 def user_suggestions():
-    recent_users = list(mongo.db.users.find({}, {'password_hash': 0, 'bookmarks': 0}).limit(5).sort('createdAt', -1))
+    recent_users = list(mongo.db.users.find({'fake': {"$ne": True}},
+                                            {'password_hash': 0, 'bookmarks': 0}).limit(5).sort('createdAt', -1))
     current_user = get_current_user()
     if current_user:
         current_user_id = current_user.get('_id')
