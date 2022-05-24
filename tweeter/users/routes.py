@@ -472,7 +472,7 @@ def user_retweets(user_id):
 
     response = list(mongo.db.posts.aggregate(pipeline))
     for post in response:
-        retweeted_by = post.get('retweeted_by')  # user ids
+        retweeted_by = post.get('retweeted_by', [])  # user ids
         post['liked'] = True if post.get('_id') in liked_posts else False
         post['saved'] = True if post.get('_id') in current_user_bookmarks else False
         post['retweeted'] = True if current_user_id in retweeted_by else False
