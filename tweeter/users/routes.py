@@ -270,7 +270,7 @@ def user_posts(user_id):
     user_id = validate_id(user_id)
     current_user = get_current_user()
     current_user_id = current_user.get('_id')
-    current_user_bookmarks = current_user.get('bookmarks')
+    current_user_bookmarks = current_user.get('bookmarks', [])
     user_likes = list(mongo.db.likes.find({'user': current_user_id}))
     liked_posts = list(map(lambda x: x.get('post'), user_likes))
     pipeline = [
@@ -318,7 +318,7 @@ def user_likes(user_id):
 
     current_user = get_current_user()
     current_user_id = current_user.get('_id')
-    current_user_bookmarks = current_user.get('bookmarks')
+    current_user_bookmarks = current_user.get('bookmarks', [])
 
     user_likes = list(mongo.db.likes.find({'user': current_user_id}))
     liked_posts = list(map(lambda x: x.get('post'), user_likes))
@@ -391,7 +391,7 @@ def user_media(user_id):
 
     current_user = get_current_user()
     current_user_id = current_user.get('_id')
-    current_user_bookmarks = current_user.get('bookmarks')
+    current_user_bookmarks = current_user.get('bookmarks', [])
 
     user_likes = list(mongo.db.likes.find({'user': current_user_id}))
     liked_posts = list(map(lambda x: x.get('post'), user_likes))
@@ -438,7 +438,7 @@ def user_media(user_id):
 def user_retweets(user_id):
     current_user = get_current_user()
     current_user_id = current_user.get('_id')
-    current_user_bookmarks = current_user.get('bookmarks')
+    current_user_bookmarks = current_user.get('bookmarks', [])
 
     user_likes = list(mongo.db.likes.find({'user': current_user_id}))
     liked_posts = list(map(lambda x: x.get('post'), user_likes))
