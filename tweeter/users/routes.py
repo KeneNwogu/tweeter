@@ -44,7 +44,7 @@ def register():
 
         token = create_register_jwt(user.inserted_id, app.config['SECRET_KEY'])
         return {
-            "user_id": str(user.inserted_id)
+            "user_id": str(user.inserted_id),
             "message": "successfully registered user",
             "token": token,
             "email": user_data.get('email'),
