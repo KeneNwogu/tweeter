@@ -59,8 +59,8 @@ def comment(post_id):
 
         comments_response = list(mongo.db.comments.aggregate(pipeline))
         for comment_obj in comments_response:
-            if comment_obj.get('_id') in liked_posts:
-                comment_obj['liked'] = True
+            comment_obj['liked'] = True if comment_obj.get('_id') in liked_posts else False
+            comment_obj['saved'] = True if comment_obj.get('_id') in user_bookmarks else False
         response = {
             "post": post,
             "comments": comments_response
