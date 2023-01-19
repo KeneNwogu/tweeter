@@ -13,6 +13,11 @@ from tweeter.api.errors import bad_request
 from tweeter.utitlities import upload_files
 
 
+@app.route('/health', methods=['GET'])
+def health_check():
+    return "Healthy"
+
+
 @app.route('/login', methods=['POST'])
 @cross_origin()
 def login():
